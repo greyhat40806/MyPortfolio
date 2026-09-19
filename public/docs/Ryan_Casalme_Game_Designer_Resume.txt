@@ -1,0 +1,24 @@
+# RYAN CASALME
+Game Designer & Game Developer
+Contact: ryancasalme1@gmail.com | Philippines
+GitHub: github.com/greyhat40806
+Portfolio: Full-Stack Godot 4 & Systems Design Portfolio
+
+SUMMARY:
+Aspiring Game Designer and IT student with hands-on experience designing gameplay systems, mechanics, quest lines, and technical prototypes in Godot Engine 4 (C#/.NET) and Roblox Studio. Proven ability to translate high-concept themes into robust playable loops, detailed GDDs, and responsive UI systems.
+
+PRIMARY PROJECT:
+Huling Linya (In Development) - Godot Engine 4, C#/.NET
+- Tense disaster response simulation based on Philippine DRRM protocols during Typhoon Ramon.
+- Designed core emergency call triage, resource dispatch loops, and building deterioration systems.
+- Authored full GDD, branching narrative matrix, and modular C# event systems.
+
+PROTOTYPES:
+- CyberXCore (Godot, GDScript): 2D educational cybersecurity platformer with question-to-combat mechanic.
+- Rune Door Puzzle (Godot, GDScript): Tactile arithmetic puzzle with 3-life tension system.
+- Lambak ng Diwata & Lola Inday NPC (Roblox Studio, Luau): Atmospheric Philippine folklore quest system.
+
+CORE SKILLS:
+- Game Design: Gameplay Mechanics, Core Loops, GDD Authoring, Narrative & Quest Design, Controls Feel, Pacing.
+- Engines: Godot Engine 4 (C# & GDScript), Roblox Studio (Luau). (No Unity).
+- Programming: C#, GDScript, Python, Java, JavaScript, HTML, CSS.
