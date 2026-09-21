@@ -31,13 +31,32 @@ export default function ResumePage() {
         import("jspdf"),
       ]);
 
-      const canvas = await html2canvas(resumeRef.current, {
+      const element = resumeRef.current;
+      const originalWidth = element.style.width;
+      const originalHeight = element.style.height;
+      const originalOverflow = element.style.overflow;
+
+      element.style.width = "210mm";
+      element.style.height = "297mm";
+      element.style.overflow = "hidden";
+
+      const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         backgroundColor: "#ffffff",
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
       });
 
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      element.style.width = originalWidth;
+      element.style.height = originalHeight;
+      element.style.overflow = originalOverflow;
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.97);
 
       // A4 size: 210mm x 297mm
       const pdf = new jsPDF({
@@ -50,7 +69,7 @@ export default function ResumePage() {
       const pageHeight = 297;
       const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
-      // Fit to A4 page
+      // Fit to A4 page without cropping the design
       pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, Math.min(imgHeight, pageHeight));
 
       pdf.save("Ryan_Casalme_Resume.pdf");
@@ -133,6 +152,17 @@ export default function ResumePage() {
                 <div className="flex items-start gap-1.5">
                   <Globe className="w-3 h-3 text-cyan-400 shrink-0 mt-0.5" />
                   <span className="break-all">github.com/greyhat40806</span>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <Globe className="w-3 h-3 text-cyan-400 shrink-0 mt-0.5" />
+                  <a
+                    href="https://my-portfolio-cbrgnh2zg-grey-hat1.vercel.app/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="break-all text-cyan-300 hover:text-cyan-200 underline underline-offset-2"
+                  >
+                    Ryan Casalme | Portfolio
+                  </a>
                 </div>
                 <div className="flex items-start gap-1.5">
                   <MapPin className="w-3 h-3 text-cyan-400 shrink-0 mt-0.5" />
@@ -236,7 +266,7 @@ export default function ResumePage() {
                 Profile
               </h2>
               <p className="text-xs leading-relaxed text-neutral-700">
-                I'm an IT student and Game Developer with hands-on experience building game
+                I'm an IT student and Aspiring Game Developer with hands-on experience building game
                 prototypes and systems in Godot Engine 4 and Roblox Studio. I design
                 gameplay mechanics, write clear technical documentation, and turn paper
                 concepts into playable prototypes. I am currently seeking an entry-level Game Designer
