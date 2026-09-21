@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import profilePhoto from "@/image/myPicture.jpg";
 import {
@@ -14,77 +14,62 @@ import {
   Gamepad2,
   Trophy,
   User,
-  Loader2,
 } from "lucide-react";
 
+function ResumeHighlight({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-block rounded-[2px] bg-yellow-200 px-[2px] py-[1px] text-slate-900 leading-[1.4] align-middle">
+      {children}
+    </span>
+  );
+}
+
+// Bullet list with a hanging indent: the dot and the text sit side by side,
+// so wrapped lines start under the first letter of the text, not under the dot.
+function BulletList({ items }: { items: React.ReactNode[] }) {
+  return (
+    <ul className="space-y-0.5 text-xs text-neutral-700">
+      {items.map((item, i) => (
+        <li key={i} className="flex items-start gap-2">
+          <span className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-neutral-700" />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function ResumePage() {
-  const resumeRef = useRef<HTMLDivElement>(null);
-  const [downloading, setDownloading] = useState(false);
-
-  const handleDownloadPDF = async () => {
-    if (!resumeRef.current || downloading) return;
-    setDownloading(true);
-
-    try {
-      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-        import("html2canvas-pro"),
-        import("jspdf"),
-      ]);
-
-      const element = resumeRef.current;
-      const originalWidth = element.style.width;
-      const originalHeight = element.style.height;
-      const originalOverflow = element.style.overflow;
-
-      element.style.width = "210mm";
-      element.style.height = "297mm";
-      element.style.overflow = "hidden";
-
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
-      });
-
-      element.style.width = originalWidth;
-      element.style.height = originalHeight;
-      element.style.overflow = originalOverflow;
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.97);
-
-      // A4 size: 210mm x 297mm
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const pageWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
-      // Fit to A4 page without cropping the design
-      pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, Math.min(imgHeight, pageHeight));
-
-      pdf.save("Ryan_Casalme_Resume.pdf");
-    } catch (error) {
-      console.error("PDF generation failed:", error);
-      alert("Failed to generate PDF. Please try again.");
-    } finally {
-      setDownloading(false);
-    }
+  // Uses the browser's own print-to-PDF, so the PDF keeps the real styling,
+  // real selectable text, and clickable links. The default file name comes
+  // from the page title.
+  const handleDownloadPDF = () => {
+    const previousTitle = document.title;
+    document.title = "Ryan_Casalme_Resume";
+    const restoreTitle = () => {
+      document.title = previousTitle;
+      window.removeEventListener("afterprint", restoreTitle);
+    };
+    window.addEventListener("afterprint", restoreTitle);
+    window.print();
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 py-10 px-4">
+    <div className="min-h-screen bg-slate-950 py-10 px-4 print:min-h-0 print:bg-white print:p-0">
+      <style>{`
+        @page { size: A4; margin: 0; }
+        @media print {
+          html, body { margin: 0 !important; background: #fff !important; }
+          .resume-sheet { width: 210mm; height: 297mm; overflow: hidden; break-inside: avoid; }
+          .resume-sheet, .resume-sheet * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+        }
+      `}</style>
+
       {/* Action bar */}
-      <div className="max-w-[210mm] mx-auto mb-6 flex items-center justify-between">
+      <div className="max-w-[210mm] mx-auto mb-6 flex items-center justify-between print:hidden">
         <Link
           href="/"
           className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition"
@@ -94,28 +79,15 @@ export default function ResumePage() {
         </Link>
         <button
           onClick={handleDownloadPDF}
-          disabled={downloading}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm font-semibold transition disabled:opacity-60"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm font-semibold transition"
         >
-          {downloading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Generating PDF...
-            </>
-          ) : (
-            <>
-              <Download className="w-4 h-4" />
-              Download PDF (A4)
-            </>
-          )}
+          <Download className="w-4 h-4" />
+          Download PDF (A4)
         </button>
       </div>
 
       {/* ============ RESUME SHEET (A4: 210mm x 297mm) ============ */}
-      <div
-        ref={resumeRef}
-        className="resume-sheet mx-auto bg-white text-neutral-900 overflow-hidden shadow-2xl"
-      >
+      <div className="resume-sheet mx-auto bg-white text-neutral-900 overflow-hidden shadow-2xl print:mx-0 print:shadow-none">
         <div className="grid grid-cols-[240px_1fr] min-h-[297mm]">
           {/* ===== LEFT SIDEBAR ===== */}
           <aside className="bg-slate-900 text-white p-6 space-y-6">
@@ -156,12 +128,12 @@ export default function ResumePage() {
                 <div className="flex items-start gap-1.5">
                   <Globe className="w-3 h-3 text-cyan-400 shrink-0 mt-0.5" />
                   <a
-                    href="https://my-portfolio-cbrgnh2zg-grey-hat1.vercel.app/"
+                    href="https://my-portfolio-grey-hat1.vercel.app/"
                     target="_blank"
                     rel="noreferrer"
                     className="break-all text-cyan-300 hover:text-cyan-200 underline underline-offset-2"
                   >
-                    Ryan Casalme | Portfolio
+                    Ryan Casalme | Game Designer &amp; Game Developer Portfolio
                   </a>
                 </div>
                 <div className="flex items-start gap-1.5">
@@ -295,20 +267,13 @@ export default function ResumePage() {
                 <div className="text-[10px] text-neutral-500 font-medium">
                   Godot Engine 4 • C# / .NET • Solo Designer &amp; Developer
                 </div>
-                <ul className="text-xs text-neutral-700 space-y-0.5 list-disc list-inside">
-                  <li>
-                    Designed the core emergency-dispatch loop: answer calls, triage, send
-                    rescue teams, deal with consequences.
-                  </li>
-                  <li>
-                    Implemented call queues, dispatch state machines, and building
-                    deterioration systems in C#.
-                  </li>
-                  <li>
-                    Wrote the full Game Design Document and a branching narrative with 4
-                    endings based on real DRRM procedures.
-                  </li>
-                </ul>
+                <BulletList
+                  items={[
+                    "Designed the core emergency-dispatch loop: answer calls, triage, send rescue teams, deal with consequences.",
+                    "Implemented call queues, dispatch state machines, and building deterioration systems in C#.",
+                    "Wrote the full Game Design Document and a branching narrative with 4 endings based on real DRRM procedures.",
+                  ]}
+                />
               </div>
 
               {/* CyberXCore */}
@@ -324,13 +289,12 @@ export default function ResumePage() {
                 <div className="text-[10px] text-neutral-500 font-medium">
                   Godot Engine • GDScript
                 </div>
-                <ul className="text-xs text-neutral-700 space-y-0.5 list-disc list-inside">
-                  <li>
-                    Built a quiz-to-combat mechanic: correct answers power player attacks,
-                    wrong answers trigger enemy counter-attacks.
-                  </li>
-                  <li>Designed enemy encounters, level flow, and gameplay HUD feedback.</li>
-                </ul>
+                <BulletList
+                  items={[
+                    "Built a quiz-to-combat mechanic: correct answers power player attacks, wrong answers trigger enemy counter-attacks.",
+                    "Designed enemy encounters, level flow, and gameplay HUD feedback.",
+                  ]}
+                />
               </div>
 
               {/* Rune Door Puzzle */}
@@ -346,16 +310,12 @@ export default function ResumePage() {
                 <div className="text-[10px] text-neutral-500 font-medium">
                   Godot Engine • GDScript
                 </div>
-                <ul className="text-xs text-neutral-700 space-y-0.5 list-disc list-inside">
-                  <li>
-                    Designed rotating rune dials with real-time equation previews and a
-                    three-life failure system.
-                  </li>
-                  <li>
-                    Focused on tactile feedback, interaction feel, and clear success/fail
-                    states.
-                  </li>
-                </ul>
+                <BulletList
+                  items={[
+                    "Designed rotating rune dials with real-time equation previews and a three-life failure system.",
+                    "Focused on tactile feedback, interaction feel, and clear success/fail states.",
+                  ]}
+                />
               </div>
 
               {/* Lambak ng Diwata */}
@@ -371,16 +331,12 @@ export default function ResumePage() {
                 <div className="text-[10px] text-neutral-500 font-medium">
                   Roblox Studio • Luau
                 </div>
-                <ul className="text-xs text-neutral-700 space-y-0.5 list-disc list-inside">
-                  <li>
-                    Built a tropical valley environment with natural wayfinding and mood
-                    lighting.
-                  </li>
-                  <li>
-                    Scripted the &ldquo;Lola Inday&rdquo; branching dialogue and multi-stage
-                    quest system in Luau.
-                  </li>
-                </ul>
+                <BulletList
+                  items={[
+                    "Built a tropical valley environment with natural wayfinding and mood lighting.",
+                    "Scripted the “Lola Inday” branching dialogue and multi-stage quest system in Luau.",
+                  ]}
+                />
               </div>
             </section>
 
@@ -402,16 +358,12 @@ export default function ResumePage() {
                 <div className="text-[10px] text-neutral-500 font-medium">
                   Role: Game Designer &amp; Systems Prototyper
                 </div>
-                <ul className="text-xs text-neutral-700 space-y-0.5 list-disc list-inside">
-                  <li>
-                    Turned the jam theme into scoped, playable mechanics in the first hours
-                    of the sprint.
-                  </li>
-                  <li>
-                    Kept the team aligned with flowcharts and lightweight design docs; ran
-                    playtests to tune difficulty before submission.
-                  </li>
-                </ul>
+                <BulletList
+                  items={[
+                    "Turned the jam theme into scoped, playable mechanics in the first hours of the sprint.",
+                    "Kept the team aligned with flowcharts and lightweight design docs; ran playtests to tune difficulty before submission.",
+                  ]}
+                />
               </div>
             </section>
 
@@ -430,9 +382,9 @@ export default function ResumePage() {
         </div>
       </div>
 
-      <p className="max-w-[210mm] mx-auto mt-4 text-center text-xs text-slate-500">
-        Click <strong>&ldquo;Download PDF (A4)&rdquo;</strong> above — your resume will be
-        saved automatically as <strong>Ryan_Casalme_Resume.pdf</strong>.
+      <p className="max-w-[210mm] mx-auto mt-4 text-center text-xs text-slate-500 print:hidden">
+        Click <strong>&ldquo;Download PDF (A4)&rdquo;</strong> above, then choose{" "}
+        <strong>&ldquo;Save as PDF&rdquo;</strong> as the destination in the print window.
       </p>
     </div>
   );
