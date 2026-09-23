@@ -128,7 +128,7 @@ export default function ResumePage() {
                 <div className="flex items-start gap-1.5">
                   <Globe className="w-3 h-3 text-cyan-400 shrink-0 mt-0.5" />
                   <a
-                    href="https://my-portfolio-grey-hat1.vercel.app/"
+                    href="https://my-portfolio-xi-ten-93.vercel.app/"
                     target="_blank"
                     rel="noreferrer"
                     className="break-all text-cyan-300 hover:text-cyan-200 underline underline-offset-2"
